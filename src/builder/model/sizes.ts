@@ -1,0 +1,12 @@
+import { HEIGHT_PRESETS, STANDARD_DEPTH, WIDTH_PRESETS } from './types';
+
+export { HEIGHT_PRESETS, STANDARD_DEPTH, WIDTH_PRESETS };
+
+export const FRAME_BAR_THICKNESS = 24;
+export const PANEL_THICKNESS = 18;
+export const SHELF_THICKNESS = 20;
+export const DRAWER_FACE_THICKNESS = 22;
+export const RAIL_RADIUS = 10;
+export const BASE_HEIGHT = 36;
+export const CASTER_HEIGHT = 72;
+export const CASTER_RADIUS = 24;
