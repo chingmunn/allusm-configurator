@@ -124,7 +124,7 @@ export function BuilderCanvas() {
             ref={orbitControlsRef}
             makeDefault
             minDistance={400}
-            maxDistance={4200}
+            maxDistance={5500}
             enableDamping
             dampingFactor={0.1}
           />
