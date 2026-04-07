@@ -14,7 +14,11 @@ import { PanelView } from './PanelView';
 import { PegboardView } from './PegboardView';
 import { ShelfView } from './ShelfView';
 
-function BuilderSceneInner() {
+type BuilderSceneProps = {
+  renderMode?: boolean;
+};
+
+function BuilderSceneInner({ renderMode = false }: BuilderSceneProps) {
   const design = useBuilderStore(builderSelectors.design);
   const selectedItemId = useBuilderStore(builderSelectors.selectedItemId);
   const selectItem = useBuilderStore((state) => state.selectItem);
@@ -23,12 +27,14 @@ function BuilderSceneInner() {
 
   return (
     <group position={layout.sceneOffset}>
-      <CeilingReferenceView
-        width={layout.dimensions.width}
-        depth={layout.dimensions.depth}
-        height={2600}
-        onDeselect={clearSelection}
-      />
+      {!renderMode ? (
+        <CeilingReferenceView
+          width={layout.dimensions.width}
+          depth={layout.dimensions.depth}
+          height={2600}
+          onDeselect={clearSelection}
+        />
+      ) : null}
 
       {layout.bays.map((bay) => (
         <BayView
@@ -41,11 +47,12 @@ function BuilderSceneInner() {
           ]}
           size={[bay.width, layout.dimensions.height, layout.dimensions.depth]}
           selected={selectedItemId === bay.bayId}
+          renderMode={renderMode}
           onSelect={selectItem}
         />
       ))}
 
-      {design.showHumanReference ? (
+      {design.showHumanReference && !renderMode ? (
         <HumanReferenceView
           position={[
             layout.dimensions.width * 0.5,
@@ -66,6 +73,7 @@ function BuilderSceneInner() {
                 key={descriptor.id}
                 descriptor={descriptor}
                 selected={selected}
+                renderMode={renderMode}
                 onSelect={selectItem}
               />
             );
@@ -75,6 +83,7 @@ function BuilderSceneInner() {
                 key={descriptor.id}
                 descriptor={descriptor}
                 selected={selected}
+                renderMode={renderMode}
                 onSelect={selectItem}
               />
             );
@@ -84,6 +93,7 @@ function BuilderSceneInner() {
                 key={descriptor.id}
                 descriptor={descriptor}
                 selected={selected}
+                renderMode={renderMode}
                 onSelect={selectItem}
               />
             );
@@ -93,6 +103,7 @@ function BuilderSceneInner() {
                 key={descriptor.id}
                 descriptor={descriptor}
                 selected={selected}
+                renderMode={renderMode}
                 onSelect={selectItem}
               />
             );
@@ -102,6 +113,7 @@ function BuilderSceneInner() {
                 key={descriptor.id}
                 descriptor={descriptor}
                 selected={selected}
+                renderMode={renderMode}
                 onSelect={selectItem}
               />
             );
@@ -111,6 +123,7 @@ function BuilderSceneInner() {
                 key={descriptor.id}
                 descriptor={descriptor}
                 selected={selected}
+                renderMode={renderMode}
                 onSelect={selectItem}
               />
             );
@@ -120,6 +133,7 @@ function BuilderSceneInner() {
                 key={descriptor.id}
                 descriptor={descriptor}
                 selected={selected}
+                renderMode={renderMode}
                 onSelect={selectItem}
               />
             );
@@ -129,6 +143,7 @@ function BuilderSceneInner() {
                 key={descriptor.id}
                 descriptor={descriptor}
                 selected={selected}
+                renderMode={renderMode}
                 onSelect={selectItem}
               />
             );
@@ -145,6 +160,7 @@ function BuilderSceneInner() {
               key={descriptor.id}
               descriptor={descriptor}
               selected={selected}
+              renderMode={renderMode}
               onSelect={selectItem}
             />
           );
@@ -155,6 +171,7 @@ function BuilderSceneInner() {
             key={descriptor.id}
             descriptor={descriptor}
             selected={selected}
+            renderMode={renderMode}
             onSelect={selectItem}
           />
         );

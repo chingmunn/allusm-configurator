@@ -4,6 +4,7 @@ import { SelectableBox } from './SelectableBox';
 type FrameViewProps = {
   descriptor: BoxDescriptor;
   selected: boolean;
+  renderMode?: boolean;
   onSelect: (id: string) => void;
 };
 

@@ -1,11 +1,12 @@
 import { Edges } from '@react-three/drei';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
 import type { BoxDescriptor } from '../model/types';
 
 type PegboardViewProps = {
   descriptor: BoxDescriptor;
   selected: boolean;
+  renderMode?: boolean;
   onSelect: (id: string) => void;
 };
 
@@ -85,11 +86,15 @@ function deriveHoleLayout(size: [number, number, number]): HoleLayout {
 export function PegboardView({
   descriptor,
   selected,
+  renderMode = false,
   onSelect,
 }: PegboardViewProps) {
   const [hovered, setHovered] = useState(false);
   const resolvedOpacity = descriptor.opacity ?? 1;
-  const resolvedRoughness = descriptor.roughness ?? 0.58;
+  const resolvedRoughness = Math.max(
+    renderMode ? (descriptor.roughness ?? 0.58) - 0.06 : descriptor.roughness ?? 0.58,
+    0.04,
+  );
   const resolvedMetalness = descriptor.metalness ?? 0.08;
   const resolvedTransmission = descriptor.transmission ?? 0.68;
   const isTransparent = resolvedOpacity < 1;
@@ -97,6 +102,12 @@ export function PegboardView({
     () => deriveHoleLayout(descriptor.size),
     [descriptor.size],
   );
+
+  useEffect(() => {
+    if (renderMode) {
+      setHovered(false);
+    }
+  }, [renderMode]);
 
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
@@ -108,6 +119,9 @@ export function PegboardView({
       position={descriptor.position}
       onPointerDown={handlePointerDown}
       onPointerOver={(event) => {
+        if (renderMode) {
+          return;
+        }
         event.stopPropagation();
         setHovered(true);
       }}
@@ -120,11 +134,11 @@ export function PegboardView({
             color={descriptor.color}
             roughness={resolvedRoughness}
             metalness={resolvedMetalness}
-            emissive={selected ? '#ffffff' : descriptor.color}
-            emissiveIntensity={selected ? 0.3 : hovered ? 0.12 : 0}
+            emissive={selected && !renderMode ? '#ffffff' : descriptor.color}
+            emissiveIntensity={renderMode ? 0 : selected ? 0.3 : hovered ? 0.12 : 0}
             transparent
             opacity={resolvedOpacity}
-            transmission={resolvedTransmission}
+            transmission={renderMode ? Math.min(resolvedTransmission + 0.08, 0.9) : resolvedTransmission}
             thickness={1}
             clearcoat={0.4}
             clearcoatRoughness={0.08}
@@ -135,11 +149,13 @@ export function PegboardView({
             color={descriptor.color}
             roughness={resolvedRoughness}
             metalness={resolvedMetalness}
-            emissive={selected ? '#ffffff' : descriptor.color}
-            emissiveIntensity={selected ? 0.34 : hovered ? 0.14 : 0}
+            emissive={selected && !renderMode ? '#ffffff' : descriptor.color}
+            emissiveIntensity={renderMode ? 0 : selected ? 0.34 : hovered ? 0.14 : 0}
           />
         )}
-        {selected ? <Edges color="#ffffff" scale={1.01} threshold={15} /> : null}
+        {selected && !renderMode ? (
+          <Edges color="#ffffff" scale={1.01} threshold={15} />
+        ) : null}
       </mesh>
 
       {holeLayout.positions.map((position, index) => (

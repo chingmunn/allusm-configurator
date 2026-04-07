@@ -4,6 +4,7 @@ import { SelectableCylinder } from './SelectableCylinder';
 type HangerRailViewProps = {
   descriptor: CylinderDescriptor;
   selected: boolean;
+  renderMode?: boolean;
   onSelect: (id: string) => void;
 };
 

@@ -5,12 +5,14 @@ import { SelectableCylinder } from './SelectableCylinder';
 type BaseBoxViewProps = {
   descriptor: BoxDescriptor;
   selected: boolean;
+  renderMode?: boolean;
   onSelect: (id: string) => void;
 };
 
 type BaseCylinderViewProps = {
   descriptor: CylinderDescriptor;
   selected: boolean;
+  renderMode?: boolean;
   onSelect: (id: string) => void;
 };
 

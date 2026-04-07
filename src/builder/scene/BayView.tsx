@@ -1,5 +1,5 @@
 import { Edges } from '@react-three/drei';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
 
 type BayViewProps = {
@@ -7,6 +7,7 @@ type BayViewProps = {
   position: [number, number, number];
   size: [number, number, number];
   selected: boolean;
+  renderMode?: boolean;
   onSelect: (id: string) => void;
 };
 
@@ -15,9 +16,16 @@ export function BayView({
   position,
   size,
   selected,
+  renderMode = false,
   onSelect,
 }: BayViewProps) {
   const [hovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    if (renderMode) {
+      setHovered(false);
+    }
+  }, [renderMode]);
 
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
@@ -29,6 +37,9 @@ export function BayView({
       position={position}
       onPointerDown={handlePointerDown}
       onPointerOver={(event) => {
+        if (renderMode) {
+          return;
+        }
         event.stopPropagation();
         setHovered(true);
       }}
@@ -37,11 +48,13 @@ export function BayView({
       <boxGeometry args={size} />
       <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       {selected || hovered ? (
+        renderMode ? null : (
         <Edges
           color={selected ? '#ffd666' : '#9aa8b4'}
           scale={1.001}
           threshold={15}
         />
+        )
       ) : null}
     </mesh>
   );

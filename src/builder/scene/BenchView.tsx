@@ -4,6 +4,7 @@ import { SelectableBox } from './SelectableBox';
 type BenchViewProps = {
   descriptor: BoxDescriptor;
   selected: boolean;
+  renderMode?: boolean;
   onSelect: (id: string) => void;
 };
 
