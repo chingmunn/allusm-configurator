@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { createDefaultDesign } from '../model/defaultDesign';
-import { serializeDesign } from '../model/serialization';
+import { normalizeDesignConfig, serializeDesign } from '../model/serialization';
 import { createId } from '../utils/id';
 import type {
   BaseType,
-  CompartmentVerticalFrameKey,
+  CompartmentFrameKey,
   DesignConfig,
   FrameFinish,
   HeightPreset,
@@ -15,7 +15,7 @@ import type {
   SidePanelSide,
   WidthPreset,
 } from '../model/types';
-import { createDefaultCompartmentVerticalFrames } from '../model/types';
+import { createDefaultCompartmentFrameEdges } from '../model/types';
 
 type FinishValue = PanelFinish | RailFinish;
 type PrimaryInsertType = PrimaryInsertConfig['type'];
@@ -57,9 +57,9 @@ type BuilderState = {
     compartmentId: string,
     side: SidePanelSide,
   ) => void;
-  toggleVerticalFrame: (
+  toggleCompartmentFrameEdge: (
     compartmentId: string,
-    frameKey: CompartmentVerticalFrameKey,
+    frameKey: CompartmentFrameKey,
   ) => void;
   updateBackPanelFinish: (compartmentId: string, finish: PanelFinish) => void;
   updateTopPanelFinish: (compartmentId: string, finish: PanelFinish) => void;
@@ -158,7 +158,7 @@ export const useBuilderStore = create<BuilderState>()(
                         bottomPanel: null,
                         sidePanels: [],
                       },
-                      verticalFrames: createDefaultCompartmentVerticalFrames(),
+                      frameEdges: createDefaultCompartmentFrameEdges(),
                     },
                   ],
                 },
@@ -222,7 +222,7 @@ export const useBuilderStore = create<BuilderState>()(
                             bottomPanel: null,
                             sidePanels: [],
                           },
-                          verticalFrames: createDefaultCompartmentVerticalFrames(),
+                          frameEdges: createDefaultCompartmentFrameEdges(),
                         },
                       ],
                     }
@@ -555,7 +555,7 @@ export const useBuilderStore = create<BuilderState>()(
             })),
           })),
         })),
-      toggleVerticalFrame: (compartmentId, frameKey) =>
+      toggleCompartmentFrameEdge: (compartmentId, frameKey) =>
         set((state) => ({
           design: mapDesign(state.design, (design) => ({
             ...design,
@@ -565,9 +565,13 @@ export const useBuilderStore = create<BuilderState>()(
                 compartment.id === compartmentId
                   ? {
                       ...compartment,
-                      verticalFrames: {
-                        ...compartment.verticalFrames,
-                        [frameKey]: !compartment.verticalFrames[frameKey],
+                      frameEdges: {
+                        ...createDefaultCompartmentFrameEdges(),
+                        ...compartment.frameEdges,
+                        [frameKey]: !(
+                          compartment.frameEdges?.[frameKey] ??
+                          createDefaultCompartmentFrameEdges()[frameKey]
+                        ),
                       },
                     }
                   : compartment,
@@ -723,10 +727,22 @@ export const useBuilderStore = create<BuilderState>()(
     }),
     {
       name: 'wardrobe-builder-state',
+      version: 2,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         design: state.design,
       }),
+      merge: (persistedState, currentState) => {
+        const typedPersistedState = persistedState as Partial<BuilderState> | undefined;
+
+        return {
+          ...currentState,
+          ...typedPersistedState,
+          design: typedPersistedState?.design
+            ? normalizeDesignConfig(typedPersistedState.design)
+            : currentState.design,
+        };
+      },
     },
   ),
 );

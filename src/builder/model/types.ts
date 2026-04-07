@@ -20,11 +20,19 @@ export const FRAME_FINISHES = ['raw-aluminium', 'black'] as const;
 export const BASE_TYPES = ['fixed', 'casters'] as const;
 export const SIDE_PANEL_SIDES = ['left', 'right'] as const;
 export const RAIL_FINISHES = ['light-grey-metal', 'dark-metal'] as const;
-export const COMPARTMENT_VERTICAL_FRAME_KEYS = [
+export const COMPARTMENT_FRAME_KEYS = [
   'frontLeft',
   'frontRight',
   'backLeft',
   'backRight',
+  'topFront',
+  'topBack',
+  'topLeft',
+  'topRight',
+  'bottomFront',
+  'bottomBack',
+  'bottomLeft',
+  'bottomRight',
 ] as const;
 
 export type PanelFinish = (typeof PANEL_FINISHES)[number];
@@ -32,8 +40,7 @@ export type FrameFinish = (typeof FRAME_FINISHES)[number];
 export type BaseType = (typeof BASE_TYPES)[number];
 export type SidePanelSide = (typeof SIDE_PANEL_SIDES)[number];
 export type RailFinish = (typeof RAIL_FINISHES)[number];
-export type CompartmentVerticalFrameKey =
-  (typeof COMPARTMENT_VERTICAL_FRAME_KEYS)[number];
+export type CompartmentFrameKey = (typeof COMPARTMENT_FRAME_KEYS)[number];
 
 export type OpenInsert = {
   type: 'open';
@@ -102,17 +109,22 @@ export type CompartmentPanels = {
   sidePanels: SidePanelInsert[];
 };
 
-export type CompartmentVerticalFrames = Record<
-  CompartmentVerticalFrameKey,
-  boolean
->;
+export type CompartmentFrameEdges = Record<CompartmentFrameKey, boolean>;
 
-export function createDefaultCompartmentVerticalFrames(): CompartmentVerticalFrames {
+export function createDefaultCompartmentFrameEdges(): CompartmentFrameEdges {
   return {
     frontLeft: true,
     frontRight: true,
     backLeft: true,
     backRight: true,
+    topFront: true,
+    topBack: true,
+    topLeft: true,
+    topRight: true,
+    bottomFront: true,
+    bottomBack: true,
+    bottomLeft: true,
+    bottomRight: true,
   };
 }
 
@@ -121,7 +133,7 @@ export type Compartment = {
   height: HeightPreset;
   primaryInsert: PrimaryInsertConfig;
   panels: CompartmentPanels;
-  verticalFrames: CompartmentVerticalFrames;
+  frameEdges: CompartmentFrameEdges;
 };
 
 export type Bay = {

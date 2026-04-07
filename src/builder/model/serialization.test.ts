@@ -79,7 +79,7 @@ describe('design serialization', () => {
     );
   });
 
-  it('defaults compartment vertical frames to enabled when omitted', () => {
+  it('defaults compartment frame edges to enabled when omitted', () => {
     const parsed = parseDesignJson(
       JSON.stringify({
         version: 1,
@@ -108,8 +108,10 @@ describe('design serialization', () => {
       }),
     );
 
-    expect(parsed.bays[0].compartments[0].verticalFrames.frontLeft).toBe(true);
-    expect(parsed.bays[0].compartments[0].verticalFrames.backRight).toBe(true);
+    expect(parsed.bays[0].compartments[0].frameEdges.frontLeft).toBe(true);
+    expect(parsed.bays[0].compartments[0].frameEdges.backRight).toBe(true);
+    expect(parsed.bays[0].compartments[0].frameEdges.topFront).toBe(true);
+    expect(parsed.bays[0].compartments[0].frameEdges.bottomLeft).toBe(true);
   });
 
   it('rejects invalid JSON', () => {

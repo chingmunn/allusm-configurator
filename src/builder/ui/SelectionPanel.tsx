@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { getSelectionInfo } from '../model/selection';
 import {
-  COMPARTMENT_VERTICAL_FRAME_KEYS,
+  COMPARTMENT_FRAME_KEYS,
   SIDE_PANEL_SIDES,
 } from '../model/types';
 import { builderSelectors, useBuilderStore } from '../store/useBuilderStore';
@@ -13,6 +13,24 @@ const PRIMARY_INSERT_OPTIONS = [
   'bench',
   'drawer',
 ] as const;
+
+const COMPARTMENT_FRAME_LABELS: Record<
+  (typeof COMPARTMENT_FRAME_KEYS)[number],
+  string
+> = {
+  frontLeft: 'Front left upright',
+  frontRight: 'Front right upright',
+  backLeft: 'Back left upright',
+  backRight: 'Back right upright',
+  topFront: 'Top front rail',
+  topBack: 'Top back rail',
+  topLeft: 'Top left rail',
+  topRight: 'Top right rail',
+  bottomFront: 'Bottom front rail',
+  bottomBack: 'Bottom back rail',
+  bottomLeft: 'Bottom left rail',
+  bottomRight: 'Bottom right rail',
+};
 
 export function SelectionPanel() {
   const design = useBuilderStore(builderSelectors.design);
@@ -36,7 +54,9 @@ export function SelectionPanel() {
   const toggleSidePanelPegboard = useBuilderStore(
     (state) => state.toggleSidePanelPegboard,
   );
-  const toggleVerticalFrame = useBuilderStore((state) => state.toggleVerticalFrame);
+  const toggleCompartmentFrameEdge = useBuilderStore(
+    (state) => state.toggleCompartmentFrameEdge,
+  );
   const selection = useMemo(
     () => getSelectionInfo(design, selectedItemId),
     [design, selectedItemId],
@@ -190,25 +210,17 @@ export function SelectionPanel() {
           </div>
 
           <div className="form-grid">
-            <span>Vertical frame uprights</span>
-            {COMPARTMENT_VERTICAL_FRAME_KEYS.map((frameKey) => (
+            <span>Compartment frame edges</span>
+            {COMPARTMENT_FRAME_KEYS.map((frameKey) => (
               <label key={frameKey} className="checkbox-field">
                 <input
                   type="checkbox"
-                  checked={selection.compartment.verticalFrames[frameKey]}
+                  checked={selection.compartment.frameEdges[frameKey]}
                   onChange={() =>
-                    toggleVerticalFrame(selection.compartment.id, frameKey)
+                    toggleCompartmentFrameEdge(selection.compartment.id, frameKey)
                   }
                 />
-                <span>
-                  {frameKey === 'frontLeft'
-                    ? 'Front left upright'
-                    : frameKey === 'frontRight'
-                      ? 'Front right upright'
-                      : frameKey === 'backLeft'
-                        ? 'Back left upright'
-                        : 'Back right upright'}
-                </span>
+                <span>{COMPARTMENT_FRAME_LABELS[frameKey]}</span>
               </label>
             ))}
           </div>

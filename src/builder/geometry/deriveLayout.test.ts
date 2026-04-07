@@ -18,21 +18,21 @@ describe('deriveLayout', () => {
     expect(layout.bays[0].compartmentOffsets).toEqual([72, 472]);
   });
 
-  it('omits disabled compartment vertical uprights from frame geometry', () => {
+  it('omits disabled compartment frame edges from frame geometry', () => {
     const design = createDefaultDesign();
     const compartment = design.bays[0].compartments[0];
 
-    compartment.verticalFrames.frontLeft = false;
-    compartment.verticalFrames.backRight = false;
+    compartment.frameEdges.frontLeft = false;
+    compartment.frameEdges.topFront = false;
 
     const layout = deriveLayout(design);
     const frameIds = layout.boxes
       .filter((box) => box.kind === 'frame')
       .map((box) => box.id);
 
-    expect(frameIds).not.toContain(`frame-vertical-${compartment.id}-frontLeft`);
-    expect(frameIds).not.toContain(`frame-vertical-${compartment.id}-backRight`);
-    expect(frameIds).toContain(`frame-vertical-${compartment.id}-frontRight`);
-    expect(frameIds).toContain(`frame-vertical-${compartment.id}-backLeft`);
+    expect(frameIds).not.toContain(`frame-edge-${compartment.id}-frontLeft`);
+    expect(frameIds).not.toContain(`frame-edge-${compartment.id}-topFront`);
+    expect(frameIds).toContain(`frame-edge-${compartment.id}-frontRight`);
+    expect(frameIds).toContain(`frame-edge-${compartment.id}-bottomBack`);
   });
 });

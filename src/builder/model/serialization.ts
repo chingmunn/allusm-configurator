@@ -7,7 +7,7 @@ import {
   RAIL_FINISHES,
   SIDE_PANEL_SIDES,
   WIDTH_PRESETS,
-  createDefaultCompartmentVerticalFrames,
+  createDefaultCompartmentFrameEdges,
 } from './types';
 import type {
   BackPanelInsert,
@@ -18,7 +18,7 @@ import type {
   DesignConfig,
   FrameFinish,
   HeightPreset,
-  CompartmentVerticalFrameKey,
+  CompartmentFrameKey,
   PanelFinish,
   PrimaryInsertConfig,
   RailFinish,
@@ -72,8 +72,8 @@ function isSide(value: unknown): value is SidePanelSide {
   return SIDE_PANEL_SIDES.includes(value as SidePanelSide);
 }
 
-function parseVerticalFrames(value: unknown): Record<CompartmentVerticalFrameKey, boolean> {
-  const defaults = createDefaultCompartmentVerticalFrames();
+function parseFrameEdges(value: unknown): Record<CompartmentFrameKey, boolean> {
+  const defaults = createDefaultCompartmentFrameEdges();
 
   if (!isRecord(value)) {
     return defaults;
@@ -86,6 +86,18 @@ function parseVerticalFrames(value: unknown): Record<CompartmentVerticalFrameKey
       : defaults.frontRight,
     backLeft: isBoolean(value.backLeft) ? value.backLeft : defaults.backLeft,
     backRight: isBoolean(value.backRight) ? value.backRight : defaults.backRight,
+    topFront: isBoolean(value.topFront) ? value.topFront : defaults.topFront,
+    topBack: isBoolean(value.topBack) ? value.topBack : defaults.topBack,
+    topLeft: isBoolean(value.topLeft) ? value.topLeft : defaults.topLeft,
+    topRight: isBoolean(value.topRight) ? value.topRight : defaults.topRight,
+    bottomFront: isBoolean(value.bottomFront)
+      ? value.bottomFront
+      : defaults.bottomFront,
+    bottomBack: isBoolean(value.bottomBack) ? value.bottomBack : defaults.bottomBack,
+    bottomLeft: isBoolean(value.bottomLeft) ? value.bottomLeft : defaults.bottomLeft,
+    bottomRight: isBoolean(value.bottomRight)
+      ? value.bottomRight
+      : defaults.bottomRight,
   };
 }
 
@@ -193,7 +205,7 @@ function parseSidePanel(value: unknown): SidePanelInsert {
 
 function parseLegacyCompartmentInsert(
   value: unknown,
-): Pick<Compartment, 'primaryInsert' | 'panels' | 'verticalFrames'> {
+): Pick<Compartment, 'primaryInsert' | 'panels' | 'frameEdges'> {
   if (!isRecord(value) || !isString(value.type)) {
     throw new Error('Each legacy compartment insert must include a valid type.');
   }
@@ -212,7 +224,7 @@ function parseLegacyCompartmentInsert(
           bottomPanel: null,
           sidePanels: [],
         },
-        verticalFrames: createDefaultCompartmentVerticalFrames(),
+        frameEdges: createDefaultCompartmentFrameEdges(),
       };
     case 'pegboard':
       if (!isPanelFinish(value.finish)) {
@@ -230,7 +242,7 @@ function parseLegacyCompartmentInsert(
           bottomPanel: null,
           sidePanels: [],
         },
-        verticalFrames: createDefaultCompartmentVerticalFrames(),
+        frameEdges: createDefaultCompartmentFrameEdges(),
       };
     case 'back_panel':
       return {
@@ -241,7 +253,7 @@ function parseLegacyCompartmentInsert(
           bottomPanel: null,
           sidePanels: [],
         },
-        verticalFrames: createDefaultCompartmentVerticalFrames(),
+        frameEdges: createDefaultCompartmentFrameEdges(),
       };
     case 'side_panel':
       return {
@@ -252,7 +264,7 @@ function parseLegacyCompartmentInsert(
           bottomPanel: null,
           sidePanels: [parseSidePanel(value)],
         },
-        verticalFrames: createDefaultCompartmentVerticalFrames(),
+        frameEdges: createDefaultCompartmentFrameEdges(),
       };
     case 'top_panel':
       return {
@@ -263,7 +275,7 @@ function parseLegacyCompartmentInsert(
           bottomPanel: null,
           sidePanels: [],
         },
-        verticalFrames: createDefaultCompartmentVerticalFrames(),
+        frameEdges: createDefaultCompartmentFrameEdges(),
       };
     case 'bottom_panel':
       return {
@@ -274,7 +286,7 @@ function parseLegacyCompartmentInsert(
           bottomPanel: parseBottomPanel(value),
           sidePanels: [],
         },
-        verticalFrames: createDefaultCompartmentVerticalFrames(),
+        frameEdges: createDefaultCompartmentFrameEdges(),
       };
     default:
       throw new Error(`Unsupported legacy insert type: ${value.type}`);
@@ -311,7 +323,7 @@ function parseCompartment(value: unknown): Compartment {
           bottomPanel: parseBottomPanel(panelsRecord.bottomPanel),
           sidePanels: sidePanelValues,
         },
-        verticalFrames: parseVerticalFrames(value.verticalFrames),
+        frameEdges: parseFrameEdges(value.frameEdges ?? value.verticalFrames),
       };
     }
 
@@ -330,7 +342,7 @@ function parseCompartment(value: unknown): Compartment {
         bottomPanel: parseBottomPanel(panelsRecord.bottomPanel),
         sidePanels: sidePanelValues,
       },
-      verticalFrames: parseVerticalFrames(value.verticalFrames),
+      frameEdges: parseFrameEdges(value.frameEdges ?? value.verticalFrames),
     };
   }
 

@@ -17,11 +17,51 @@ import {
 } from '../model/sizes';
 import type {
   BoxDescriptor,
+  CompartmentFrameKey,
   CylinderDescriptor,
   DesignConfig,
   LayoutBay,
   LayoutResult,
 } from '../model/types';
+import { createDefaultCompartmentFrameEdges } from '../model/types';
+
+const SHARED_HORIZONTAL_FRAME_MAPPINGS = [
+  {
+    lowerKey: 'topFront',
+    upperKey: 'bottomFront',
+    idSuffix: 'shared-front',
+    axis: 'width',
+    zPosition: FRAME_BAR_THICKNESS / 2,
+  },
+  {
+    lowerKey: 'topBack',
+    upperKey: 'bottomBack',
+    idSuffix: 'shared-back',
+    axis: 'width',
+    zPosition: STANDARD_DEPTH - FRAME_BAR_THICKNESS / 2,
+  },
+  {
+    lowerKey: 'topLeft',
+    upperKey: 'bottomLeft',
+    idSuffix: 'shared-left',
+    axis: 'depth',
+    xOffset: 0,
+  },
+  {
+    lowerKey: 'topRight',
+    upperKey: 'bottomRight',
+    idSuffix: 'shared-right',
+    axis: 'depth',
+    xOffset: 1,
+  },
+] as const satisfies ReadonlyArray<{
+  lowerKey: CompartmentFrameKey;
+  upperKey: CompartmentFrameKey;
+  idSuffix: string;
+  axis: 'width' | 'depth';
+  zPosition?: number;
+  xOffset?: 0 | 1;
+}>;
 
 function getBaseHeight(design: DesignConfig): number {
   return design.casterEnabled ? CASTER_HEIGHT : BASE_HEIGHT;
@@ -97,77 +137,46 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
 
   layoutBays.forEach((layoutBay, bayIndex) => {
     const bay = design.bays[bayIndex];
-    const horizontalLevels = [
-      baseHeight,
-      ...layoutBay.compartmentOffsets.map(
-        (offset, index) => offset + bay.compartments[index].height,
-      ),
-    ];
-
-    horizontalLevels.forEach((level, levelIndex) => {
-      pushFrameBox(
-        boxes,
-        design,
-        `frame-horizontal-front-${bay.id}-${levelIndex}`,
-        [
-          layoutBay.xStart + layoutBay.width / 2,
-          level,
-          FRAME_BAR_THICKNESS / 2,
-        ],
-        [layoutBay.width, FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS],
-        bay.id,
-      );
-      pushFrameBox(
-        boxes,
-        design,
-        `frame-horizontal-back-${bay.id}-${levelIndex}`,
-        [
-          layoutBay.xStart + layoutBay.width / 2,
-          level,
-          STANDARD_DEPTH - FRAME_BAR_THICKNESS / 2,
-        ],
-        [layoutBay.width, FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS],
-        bay.id,
-      );
-      pushFrameBox(
-        boxes,
-        design,
-        `frame-depth-left-${bay.id}-${levelIndex}`,
-        [layoutBay.xStart, level, STANDARD_DEPTH / 2],
-        [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, STANDARD_DEPTH],
-        bay.id,
-      );
-      pushFrameBox(
-        boxes,
-        design,
-        `frame-depth-right-${bay.id}-${levelIndex}`,
-        [layoutBay.xStart + layoutBay.width, level, STANDARD_DEPTH / 2],
-        [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, STANDARD_DEPTH],
-        bay.id,
-      );
-    });
-
     bay.compartments.forEach((compartment, compartmentIndex) => {
+      const compartmentAbove = bay.compartments[compartmentIndex + 1];
       const bottomY = layoutBay.compartmentOffsets[compartmentIndex];
       const height = compartment.height;
       const centerY = bottomY + height / 2;
       const centerX = layoutBay.xStart + layoutBay.width / 2;
+      const topEdgeY = bottomY + height - FRAME_BAR_THICKNESS / 2;
+      const bottomEdgeY = bottomY + FRAME_BAR_THICKNESS / 2;
       const innerWidth = Math.max(layoutBay.width - FRAME_BAR_THICKNESS * 2, 20);
       const innerDepth = Math.max(STANDARD_DEPTH - FRAME_BAR_THICKNESS * 2, 20);
       const innerHeight = Math.max(height - FRAME_BAR_THICKNESS * 2, 20);
+      const verticalFrameHeight = height;
       const hangerRailY = bottomY + Math.max(height - 100, RAIL_RADIUS * 2);
       const hangerRailSpan = innerWidth * 0.8;
       const hangerRodTopY = bottomY + height - FRAME_BAR_THICKNESS / 2;
       const hangerRodLength = Math.max(hangerRodTopY - hangerRailY, 20);
       const hangerRodCenterY = hangerRailY + hangerRodLength / 2;
+      const frameEdges = {
+        ...createDefaultCompartmentFrameEdges(),
+        ...compartment.frameEdges,
+      };
+      const frameEdgesAbove = compartmentAbove
+        ? {
+            ...createDefaultCompartmentFrameEdges(),
+            ...compartmentAbove.frameEdges,
+          }
+        : null;
 
-      const verticalFrameDescriptors = [
+      const frameEdgeDescriptors = [
         {
           key: 'frontLeft',
           position: [
             layoutBay.xStart,
             centerY,
             FRAME_BAR_THICKNESS / 2,
+          ] as [number, number, number],
+          size: [
+            FRAME_BAR_THICKNESS,
+            verticalFrameHeight,
+            FRAME_BAR_THICKNESS,
           ] as [number, number, number],
         },
         {
@@ -177,6 +186,11 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
             centerY,
             FRAME_BAR_THICKNESS / 2,
           ] as [number, number, number],
+          size: [
+            FRAME_BAR_THICKNESS,
+            verticalFrameHeight,
+            FRAME_BAR_THICKNESS,
+          ] as [number, number, number],
         },
         {
           key: 'backLeft',
@@ -184,6 +198,11 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
             layoutBay.xStart,
             centerY,
             STANDARD_DEPTH - FRAME_BAR_THICKNESS / 2,
+          ] as [number, number, number],
+          size: [
+            FRAME_BAR_THICKNESS,
+            verticalFrameHeight,
+            FRAME_BAR_THICKNESS,
           ] as [number, number, number],
         },
         {
@@ -193,23 +212,208 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
             centerY,
             STANDARD_DEPTH - FRAME_BAR_THICKNESS / 2,
           ] as [number, number, number],
+          size: [
+            FRAME_BAR_THICKNESS,
+            verticalFrameHeight,
+            FRAME_BAR_THICKNESS,
+          ] as [number, number, number],
         },
       ] as const;
 
-      verticalFrameDescriptors.forEach(({ key, position }) => {
-        if (!compartment.verticalFrames[key]) {
+      frameEdgeDescriptors.forEach(({ key, position, size }) => {
+        if (!frameEdges[key]) {
           return;
         }
 
         pushFrameBox(
           boxes,
           design,
-          `frame-vertical-${compartment.id}-${key}`,
+          `frame-edge-${compartment.id}-${key}`,
           position,
-          [FRAME_BAR_THICKNESS, height, FRAME_BAR_THICKNESS],
+          size,
           compartment.id,
         );
       });
+
+      if (compartmentIndex === 0) {
+        const bottomRailDescriptors = [
+          {
+            key: 'bottomFront',
+            position: [centerX, bottomEdgeY, FRAME_BAR_THICKNESS / 2] as [
+              number,
+              number,
+              number,
+            ],
+            size: [layoutBay.width, FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS] as [
+              number,
+              number,
+              number,
+            ],
+          },
+          {
+            key: 'bottomBack',
+            position: [
+              centerX,
+              bottomEdgeY,
+              STANDARD_DEPTH - FRAME_BAR_THICKNESS / 2,
+            ] as [number, number, number],
+            size: [layoutBay.width, FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS] as [
+              number,
+              number,
+              number,
+            ],
+          },
+          {
+            key: 'bottomLeft',
+            position: [layoutBay.xStart, bottomEdgeY, STANDARD_DEPTH / 2] as [
+              number,
+              number,
+              number,
+            ],
+            size: [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, STANDARD_DEPTH] as [
+              number,
+              number,
+              number,
+            ],
+          },
+          {
+            key: 'bottomRight',
+            position: [layoutBay.xStart + layoutBay.width, bottomEdgeY, STANDARD_DEPTH / 2] as [
+              number,
+              number,
+              number,
+            ],
+            size: [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, STANDARD_DEPTH] as [
+              number,
+              number,
+              number,
+            ],
+          },
+        ] as const;
+
+        bottomRailDescriptors.forEach(({ key, position, size }) => {
+          if (!frameEdges[key]) {
+            return;
+          }
+
+          pushFrameBox(
+            boxes,
+            design,
+            `frame-edge-${compartment.id}-${key}`,
+            position,
+            size,
+            compartment.id,
+          );
+        });
+      }
+
+      if (compartmentIndex === bay.compartments.length - 1) {
+        const topRailDescriptors = [
+          {
+            key: 'topFront',
+            position: [centerX, topEdgeY, FRAME_BAR_THICKNESS / 2] as [
+              number,
+              number,
+              number,
+            ],
+            size: [layoutBay.width, FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS] as [
+              number,
+              number,
+              number,
+            ],
+          },
+          {
+            key: 'topBack',
+            position: [centerX, topEdgeY, STANDARD_DEPTH - FRAME_BAR_THICKNESS / 2] as [
+              number,
+              number,
+              number,
+            ],
+            size: [layoutBay.width, FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS] as [
+              number,
+              number,
+              number,
+            ],
+          },
+          {
+            key: 'topLeft',
+            position: [layoutBay.xStart, topEdgeY, STANDARD_DEPTH / 2] as [
+              number,
+              number,
+              number,
+            ],
+            size: [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, STANDARD_DEPTH] as [
+              number,
+              number,
+              number,
+            ],
+          },
+          {
+            key: 'topRight',
+            position: [layoutBay.xStart + layoutBay.width, topEdgeY, STANDARD_DEPTH / 2] as [
+              number,
+              number,
+              number,
+            ],
+            size: [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, STANDARD_DEPTH] as [
+              number,
+              number,
+              number,
+            ],
+          },
+        ] as const;
+
+        topRailDescriptors.forEach(({ key, position, size }) => {
+          if (!frameEdges[key]) {
+            return;
+          }
+
+          pushFrameBox(
+            boxes,
+            design,
+            `frame-edge-${compartment.id}-${key}`,
+            position,
+            size,
+            compartment.id,
+          );
+        });
+      }
+
+      if (compartmentAbove && frameEdgesAbove) {
+        SHARED_HORIZONTAL_FRAME_MAPPINGS.forEach((mapping) => {
+          const isEnabled =
+            frameEdges[mapping.lowerKey] || frameEdgesAbove[mapping.upperKey];
+
+          if (!isEnabled) {
+            return;
+          }
+
+          const position: [number, number, number] =
+            mapping.axis === 'width'
+              ? [centerX, topEdgeY, mapping.zPosition ?? STANDARD_DEPTH / 2]
+              : [
+                  mapping.xOffset === 0
+                    ? layoutBay.xStart
+                    : layoutBay.xStart + layoutBay.width,
+                  topEdgeY,
+                  STANDARD_DEPTH / 2,
+                ];
+
+          const size: [number, number, number] =
+            mapping.axis === 'width'
+              ? [layoutBay.width, FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS]
+              : [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, STANDARD_DEPTH];
+
+          pushFrameBox(
+            boxes,
+            design,
+            `frame-edge-${compartment.id}-${mapping.idSuffix}`,
+            position,
+            size,
+            compartment.id,
+          );
+        });
+      }
 
       boxes.push({
         id: `comp-shell-${compartment.id}`,

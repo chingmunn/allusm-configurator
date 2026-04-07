@@ -1,5 +1,5 @@
 import {
-  createDefaultCompartmentVerticalFrames,
+  createDefaultCompartmentFrameEdges,
   type DesignConfig,
 } from './types';
 
@@ -53,7 +53,7 @@ export function createDefaultDesign(): DesignConfig {
                 },
               ],
             },
-            verticalFrames: createDefaultCompartmentVerticalFrames(),
+            frameEdges: createDefaultCompartmentFrameEdges(),
           },
           {
             id: 'comp-left-top',
@@ -75,7 +75,7 @@ export function createDefaultDesign(): DesignConfig {
               bottomPanel: null,
               sidePanels: [],
             },
-            verticalFrames: createDefaultCompartmentVerticalFrames(),
+            frameEdges: createDefaultCompartmentFrameEdges(),
           },
         ],
       },
@@ -100,7 +100,7 @@ export function createDefaultDesign(): DesignConfig {
               },
               sidePanels: [],
             },
-            verticalFrames: createDefaultCompartmentVerticalFrames(),
+            frameEdges: createDefaultCompartmentFrameEdges(),
           },
           {
             id: 'comp-middle-mid',
@@ -123,7 +123,7 @@ export function createDefaultDesign(): DesignConfig {
               bottomPanel: null,
               sidePanels: [],
             },
-            verticalFrames: createDefaultCompartmentVerticalFrames(),
+            frameEdges: createDefaultCompartmentFrameEdges(),
           },
           {
             id: 'comp-middle-top',
@@ -141,7 +141,7 @@ export function createDefaultDesign(): DesignConfig {
               bottomPanel: null,
               sidePanels: [],
             },
-            verticalFrames: createDefaultCompartmentVerticalFrames(),
+            frameEdges: createDefaultCompartmentFrameEdges(),
           },
         ],
       },
@@ -165,7 +165,7 @@ export function createDefaultDesign(): DesignConfig {
               },
               sidePanels: [],
             },
-            verticalFrames: createDefaultCompartmentVerticalFrames(),
+            frameEdges: createDefaultCompartmentFrameEdges(),
           },
           {
             id: 'comp-right-top',
@@ -195,7 +195,7 @@ export function createDefaultDesign(): DesignConfig {
                 },
               ],
             },
-            verticalFrames: createDefaultCompartmentVerticalFrames(),
+            frameEdges: createDefaultCompartmentFrameEdges(),
           },
         ],
       },
