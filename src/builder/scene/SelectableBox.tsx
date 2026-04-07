@@ -21,7 +21,13 @@ export function SelectableBox({
   const resolvedRoughness = descriptor.roughness ?? 0.48;
   const resolvedMetalness =
     descriptor.metalness ?? (descriptor.kind === 'frame' ? 0.55 : 0.14);
+  const resolvedTransmission = descriptor.transmission ?? 0.72;
   const isTransparent = resolvedOpacity < 1;
+  const useGlassMaterial =
+    isTransparent &&
+    (descriptor.kind === 'panel' ||
+      descriptor.kind === 'pegboard' ||
+      descriptor.kind === 'shelf');
 
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
@@ -41,7 +47,7 @@ export function SelectableBox({
       receiveShadow
     >
       <boxGeometry args={descriptor.size} />
-      {isTransparent ? (
+      {useGlassMaterial ? (
         <meshPhysicalMaterial
           color={descriptor.color}
           roughness={resolvedRoughness}
@@ -50,7 +56,7 @@ export function SelectableBox({
           emissiveIntensity={selected ? 0.32 : hovered ? 0.16 : 0}
           transparent
           opacity={resolvedOpacity}
-          transmission={0.72}
+          transmission={resolvedTransmission}
           thickness={1}
           clearcoat={0.45}
           clearcoatRoughness={0.08}

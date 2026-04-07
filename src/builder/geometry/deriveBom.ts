@@ -2,7 +2,6 @@ import {
   BASE_HEIGHT,
   CASTER_HEIGHT,
   FRAME_BAR_THICKNESS,
-  STANDARD_DEPTH,
 } from '../model/sizes';
 import { createDefaultCompartmentFrameEdges } from '../model/types';
 import type { BomSummary, CompartmentFrameKey, DesignConfig } from '../model/types';
@@ -29,6 +28,7 @@ const SHARED_DEPTH_KEY_PAIRS = [
 
 export function deriveBom(design: DesignConfig): BomSummary {
   const baseHeight = design.casterEnabled ? CASTER_HEIGHT : BASE_HEIGHT;
+  const designDepth = design.depth;
   const totalWidth = design.bays.reduce((sum, bay) => sum + bay.width, 0);
   const bodyHeight = Math.max(
     ...design.bays.map((bay) =>
@@ -128,7 +128,7 @@ export function deriveBom(design: DesignConfig): BomSummary {
         EXTERNAL_BOTTOM_DEPTH_KEYS.forEach((key) => {
           if (frameEdges[key]) {
             depthCount += 1;
-            depthLength += STANDARD_DEPTH;
+            depthLength += designDepth;
           }
         });
       }
@@ -144,7 +144,7 @@ export function deriveBom(design: DesignConfig): BomSummary {
         EXTERNAL_TOP_DEPTH_KEYS.forEach((key) => {
           if (frameEdges[key]) {
             depthCount += 1;
-            depthLength += STANDARD_DEPTH;
+            depthLength += designDepth;
           }
         });
       }
@@ -160,7 +160,7 @@ export function deriveBom(design: DesignConfig): BomSummary {
         SHARED_DEPTH_KEY_PAIRS.forEach(([lowerKey, upperKey]) => {
           if (frameEdges[lowerKey] || frameEdgesAbove[upperKey]) {
             depthCount += 1;
-            depthLength += STANDARD_DEPTH;
+            depthLength += designDepth;
           }
         });
       }
@@ -171,7 +171,7 @@ export function deriveBom(design: DesignConfig): BomSummary {
     dimensions: {
       width: totalWidth,
       height: totalHeight,
-      depth: STANDARD_DEPTH,
+      depth: designDepth,
     },
     totalBays: design.bays.length,
     totalCompartments,

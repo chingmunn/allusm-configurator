@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getSelectionInfo } from '../model/selection';
-import { HEIGHT_PRESETS, WIDTH_PRESETS } from '../model/types';
+import { DEPTH_PRESETS, HEIGHT_PRESETS, WIDTH_PRESETS } from '../model/types';
 import { builderSelectors, useBuilderStore } from '../store/useBuilderStore';
 
 function formatPanelSummary(panelCount: number): string {
@@ -29,6 +29,7 @@ export function StructurePanel() {
   const updateCompartmentHeight = useBuilderStore(
     (state) => state.updateCompartmentHeight,
   );
+  const setDepth = useBuilderStore((state) => state.setDepth);
   const selectItem = useBuilderStore((state) => state.selectItem);
   const selection = useMemo(
     () => getSelectionInfo(design, selectedItemId),
@@ -147,6 +148,26 @@ export function StructurePanel() {
             );
           })()
         ))}
+      </div>
+
+      <div className="form-grid">
+        <label>
+          <span>Overall depth</span>
+          <select
+            value={design.depth}
+            onChange={(event) =>
+              setDepth(
+                Number(event.target.value) as (typeof DEPTH_PRESETS)[number],
+              )
+            }
+          >
+            {DEPTH_PRESETS.map((depth) => (
+              <option key={depth} value={depth}>
+                {depth} mm
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       {selection?.kind === 'bay' ? (

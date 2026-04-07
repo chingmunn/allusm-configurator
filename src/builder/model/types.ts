@@ -1,9 +1,11 @@
 export const WIDTH_PRESETS = [300, 400, 500, 600, 800, 1000] as const;
 export const HEIGHT_PRESETS = [200, 300, 400, 500, 600, 800, 1000, 1100, 1200, 1300, 1400, 1500, 1600] as const;
+export const DEPTH_PRESETS = [400, 500, 600] as const;
 export const STANDARD_DEPTH = 500;
 
 export type WidthPreset = (typeof WIDTH_PRESETS)[number];
 export type HeightPreset = (typeof HEIGHT_PRESETS)[number];
+export type DepthPreset = (typeof DEPTH_PRESETS)[number];
 
 export const PANEL_FINISHES = [
   'natural-oak',
@@ -152,6 +154,7 @@ export type DesignConfig = {
   frameFinish: FrameFinish;
   baseType: BaseType;
   casterEnabled: boolean;
+  depth: DepthPreset;
   showHumanReference: boolean;
   bays: Bay[];
   selectedItemId: string | null;
@@ -219,6 +222,7 @@ export type BoxDescriptor = {
   opacity?: number;
   roughness?: number;
   metalness?: number;
+  transmission?: number;
   position: [number, number, number];
   size: [number, number, number];
 };

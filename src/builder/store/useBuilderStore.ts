@@ -6,6 +6,7 @@ import { createId } from '../utils/id';
 import type {
   BaseType,
   CompartmentFrameKey,
+  DepthPreset,
   DesignConfig,
   FrameFinish,
   HeightPreset,
@@ -73,6 +74,7 @@ type BuilderState = {
   setFrameFinish: (finish: FrameFinish) => void;
   setBaseType: (baseType: BaseType) => void;
   setCasterEnabled: (enabled: boolean) => void;
+  setDepth: (depth: DepthPreset) => void;
   selectItem: (id: string | null) => void;
   loadDesign: (design: DesignConfig) => void;
   resetDesign: () => void;
@@ -689,6 +691,13 @@ export const useBuilderStore = create<BuilderState>()(
           design: mapDesign(state.design, (design) => ({
             ...design,
             casterEnabled: enabled,
+          })),
+        })),
+      setDepth: (depth) =>
+        set((state) => ({
+          design: mapDesign(state.design, (design) => ({
+            ...design,
+            depth,
           })),
         })),
       setShowHumanReference: (enabled) =>

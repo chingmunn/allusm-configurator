@@ -8,5 +8,5 @@ type CompartmentViewProps = {
 };
 
 export function CompartmentView(props: CompartmentViewProps) {
-  return <SelectableBox {...props} opacity={0.18} />;
+  return <SelectableBox {...props} opacity={0.05} />;
 }

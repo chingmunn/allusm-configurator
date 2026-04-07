@@ -1,4 +1,5 @@
 import {
+  STANDARD_DEPTH,
   createDefaultCompartmentFrameEdges,
   type DesignConfig,
 } from './types';
@@ -14,6 +15,7 @@ export function createDefaultDesign(): DesignConfig {
     frameFinish: 'raw-aluminium',
     baseType: 'casters',
     casterEnabled: true,
+    depth: STANDARD_DEPTH,
     showHumanReference: true,
     selectedItemId: FRAME_ROOT_ID,
     metadata: {

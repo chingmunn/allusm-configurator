@@ -1,6 +1,7 @@
 import { createDefaultDesign } from './defaultDesign';
 import {
   BASE_TYPES,
+  DEPTH_PRESETS,
   FRAME_FINISHES,
   HEIGHT_PRESETS,
   PANEL_FINISHES,
@@ -15,6 +16,7 @@ import type {
   BaseType,
   Bay,
   Compartment,
+  DepthPreset,
   DesignConfig,
   FrameFinish,
   HeightPreset,
@@ -50,6 +52,10 @@ function isWidthPreset(value: unknown): value is WidthPreset {
 
 function isHeightPreset(value: unknown): value is HeightPreset {
   return HEIGHT_PRESETS.includes(value as HeightPreset);
+}
+
+function isDepthPreset(value: unknown): value is DepthPreset {
+  return DEPTH_PRESETS.includes(value as DepthPreset);
 }
 
 function isFrameFinish(value: unknown): value is FrameFinish {
@@ -389,6 +395,7 @@ export function normalizeDesignConfig(input: unknown): DesignConfig {
     casterEnabled: isBoolean(input.casterEnabled)
       ? input.casterEnabled
       : fallback.casterEnabled,
+    depth: isDepthPreset(input.depth) ? input.depth : fallback.depth,
     showHumanReference: isBoolean(input.showHumanReference)
       ? input.showHumanReference
       : fallback.showHumanReference,

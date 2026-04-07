@@ -13,7 +13,6 @@ import {
   PANEL_THICKNESS,
   RAIL_RADIUS,
   SHELF_THICKNESS,
-  STANDARD_DEPTH,
 } from '../model/sizes';
 import type {
   BoxDescriptor,
@@ -31,14 +30,14 @@ const SHARED_HORIZONTAL_FRAME_MAPPINGS = [
     upperKey: 'bottomFront',
     idSuffix: 'shared-front',
     axis: 'width',
-    zPosition: FRAME_BAR_THICKNESS / 2,
+    zSide: 'front',
   },
   {
     lowerKey: 'topBack',
     upperKey: 'bottomBack',
     idSuffix: 'shared-back',
     axis: 'width',
-    zPosition: STANDARD_DEPTH - FRAME_BAR_THICKNESS / 2,
+    zSide: 'back',
   },
   {
     lowerKey: 'topLeft',
@@ -59,7 +58,7 @@ const SHARED_HORIZONTAL_FRAME_MAPPINGS = [
   upperKey: CompartmentFrameKey;
   idSuffix: string;
   axis: 'width' | 'depth';
-  zPosition?: number;
+  zSide?: 'front' | 'back';
   xOffset?: 0 | 1;
 }>;
 
@@ -93,11 +92,13 @@ function getPanelMaterialProps(finish: keyof typeof panelFinishMaterials) {
     opacity: material.opacity,
     roughness: material.roughness,
     metalness: material.metalness,
+    transmission: material.transmission,
   };
 }
 
 export function deriveLayout(design: DesignConfig): LayoutResult {
   const baseHeight = getBaseHeight(design);
+  const designDepth = design.depth;
   const overallWidth = design.bays.reduce((sum, bay) => sum + bay.width, 0);
   const overallBodyHeight = Math.max(
     ...design.bays.map((bay) =>
@@ -109,7 +110,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
   const dimensions = {
     width: overallWidth,
     height: overallHeight,
-    depth: STANDARD_DEPTH,
+    depth: designDepth,
   };
 
   const layoutBays: LayoutBay[] = [];
@@ -146,7 +147,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
       const topEdgeY = bottomY + height - FRAME_BAR_THICKNESS / 2;
       const bottomEdgeY = bottomY + FRAME_BAR_THICKNESS / 2;
       const innerWidth = Math.max(layoutBay.width - FRAME_BAR_THICKNESS * 2, 20);
-      const innerDepth = Math.max(STANDARD_DEPTH - FRAME_BAR_THICKNESS * 2, 20);
+      const innerDepth = Math.max(designDepth - FRAME_BAR_THICKNESS * 2, 20);
       const innerHeight = Math.max(height - FRAME_BAR_THICKNESS * 2, 20);
       const verticalFrameHeight = height;
       const hangerRailY = bottomY + Math.max(height - 100, RAIL_RADIUS * 2);
@@ -197,7 +198,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
           position: [
             layoutBay.xStart,
             centerY,
-            STANDARD_DEPTH - FRAME_BAR_THICKNESS / 2,
+            designDepth - FRAME_BAR_THICKNESS / 2,
           ] as [number, number, number],
           size: [
             FRAME_BAR_THICKNESS,
@@ -210,7 +211,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
           position: [
             layoutBay.xStart + layoutBay.width,
             centerY,
-            STANDARD_DEPTH - FRAME_BAR_THICKNESS / 2,
+            designDepth - FRAME_BAR_THICKNESS / 2,
           ] as [number, number, number],
           size: [
             FRAME_BAR_THICKNESS,
@@ -255,7 +256,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
             position: [
               centerX,
               bottomEdgeY,
-              STANDARD_DEPTH - FRAME_BAR_THICKNESS / 2,
+              designDepth - FRAME_BAR_THICKNESS / 2,
             ] as [number, number, number],
             size: [layoutBay.width, FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS] as [
               number,
@@ -265,12 +266,12 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
           },
           {
             key: 'bottomLeft',
-            position: [layoutBay.xStart, bottomEdgeY, STANDARD_DEPTH / 2] as [
+            position: [layoutBay.xStart, bottomEdgeY, designDepth / 2] as [
               number,
               number,
               number,
             ],
-            size: [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, STANDARD_DEPTH] as [
+            size: [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, designDepth] as [
               number,
               number,
               number,
@@ -278,12 +279,12 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
           },
           {
             key: 'bottomRight',
-            position: [layoutBay.xStart + layoutBay.width, bottomEdgeY, STANDARD_DEPTH / 2] as [
+            position: [layoutBay.xStart + layoutBay.width, bottomEdgeY, designDepth / 2] as [
               number,
               number,
               number,
             ],
-            size: [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, STANDARD_DEPTH] as [
+            size: [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, designDepth] as [
               number,
               number,
               number,
@@ -324,7 +325,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
           },
           {
             key: 'topBack',
-            position: [centerX, topEdgeY, STANDARD_DEPTH - FRAME_BAR_THICKNESS / 2] as [
+            position: [centerX, topEdgeY, designDepth - FRAME_BAR_THICKNESS / 2] as [
               number,
               number,
               number,
@@ -337,12 +338,12 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
           },
           {
             key: 'topLeft',
-            position: [layoutBay.xStart, topEdgeY, STANDARD_DEPTH / 2] as [
+            position: [layoutBay.xStart, topEdgeY, designDepth / 2] as [
               number,
               number,
               number,
             ],
-            size: [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, STANDARD_DEPTH] as [
+            size: [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, designDepth] as [
               number,
               number,
               number,
@@ -350,12 +351,12 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
           },
           {
             key: 'topRight',
-            position: [layoutBay.xStart + layoutBay.width, topEdgeY, STANDARD_DEPTH / 2] as [
+            position: [layoutBay.xStart + layoutBay.width, topEdgeY, designDepth / 2] as [
               number,
               number,
               number,
             ],
-            size: [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, STANDARD_DEPTH] as [
+            size: [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, designDepth] as [
               number,
               number,
               number,
@@ -390,19 +391,25 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
 
           const position: [number, number, number] =
             mapping.axis === 'width'
-              ? [centerX, topEdgeY, mapping.zPosition ?? STANDARD_DEPTH / 2]
+              ? [
+                  centerX,
+                  topEdgeY,
+                  mapping.zSide === 'back'
+                    ? designDepth - FRAME_BAR_THICKNESS / 2
+                    : FRAME_BAR_THICKNESS / 2,
+                ]
               : [
                   mapping.xOffset === 0
                     ? layoutBay.xStart
                     : layoutBay.xStart + layoutBay.width,
                   topEdgeY,
-                  STANDARD_DEPTH / 2,
+                  designDepth / 2,
                 ];
 
           const size: [number, number, number] =
-            mapping.axis === 'width'
+              mapping.axis === 'width'
               ? [layoutBay.width, FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS]
-              : [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, STANDARD_DEPTH];
+              : [FRAME_BAR_THICKNESS, FRAME_BAR_THICKNESS, designDepth];
 
           pushFrameBox(
             boxes,
@@ -419,8 +426,8 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
         id: `comp-shell-${compartment.id}`,
         kind: 'compartment',
         selectId: compartment.id,
-        color: '#dce3e8',
-        position: [centerX, centerY, STANDARD_DEPTH / 2],
+        color: '#eef3f6',
+        position: [centerX, centerY, designDepth / 2],
         size: [innerWidth, innerHeight, innerDepth],
       });
 
@@ -434,7 +441,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
           position: [
             centerX,
             centerY,
-            STANDARD_DEPTH - PANEL_THICKNESS / 2 - FRAME_BAR_THICKNESS,
+            designDepth - PANEL_THICKNESS / 2 - FRAME_BAR_THICKNESS,
           ],
           size: [innerWidth, innerHeight, PANEL_THICKNESS],
         });
@@ -447,7 +454,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
           kind: compartment.panels.topPanel.pegboard ? 'pegboard' : 'panel',
           selectId: compartment.id,
           ...material,
-          position: [centerX, bottomY + height - PANEL_THICKNESS / 2, STANDARD_DEPTH / 2],
+          position: [centerX, bottomY + height - PANEL_THICKNESS / 2, designDepth / 2],
           size: [innerWidth, PANEL_THICKNESS, innerDepth],
         });
       }
@@ -461,7 +468,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
           kind: compartment.panels.bottomPanel.pegboard ? 'pegboard' : 'panel',
           selectId: compartment.id,
           ...material,
-          position: [centerX, bottomY + PANEL_THICKNESS / 2, STANDARD_DEPTH / 2],
+          position: [centerX, bottomY + PANEL_THICKNESS / 2, designDepth / 2],
           size: [innerWidth, PANEL_THICKNESS, innerDepth],
         });
       }
@@ -482,7 +489,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
                 PANEL_THICKNESS / 2 -
                 FRAME_BAR_THICKNESS,
             centerY,
-            STANDARD_DEPTH / 2,
+            designDepth / 2,
           ],
           size: [PANEL_THICKNESS, innerHeight, innerDepth],
         });
@@ -499,7 +506,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
             kind: 'shelf',
             selectId: compartment.id,
             ...material,
-            position: [centerX, centerY, STANDARD_DEPTH / 2],
+            position: [centerX, centerY, designDepth / 2],
             size: [innerWidth, SHELF_THICKNESS, innerDepth * 0.9],
           });
           }
@@ -512,7 +519,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
             kind: 'rail',
             selectId: compartment.id,
             color: railFinishColors[railFinish],
-            position: [centerX, hangerRailY, STANDARD_DEPTH / 2],
+            position: [centerX, hangerRailY, designDepth / 2],
             radius: RAIL_RADIUS,
             height: hangerRailSpan,
             rotation: [0, 0, Math.PI / 2],
@@ -524,7 +531,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
                 kind: 'rail',
                 selectId: compartment.id,
                 color: railFinishColors[railFinish],
-                position: [rodX, hangerRodCenterY, STANDARD_DEPTH / 2],
+                position: [rodX, hangerRodCenterY, designDepth / 2],
                 radius: Math.max(RAIL_RADIUS * 0.55, 4),
                 height: hangerRodLength,
                 rotation: [0, 0, 0],
@@ -544,7 +551,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
             position: [
               centerX,
               bottomY + SHELF_THICKNESS,
-              STANDARD_DEPTH / 2,
+              designDepth / 2,
             ],
             size: [innerWidth, SHELF_THICKNESS, innerDepth * 0.95],
           });
@@ -588,13 +595,13 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
     kind: 'base',
     selectId: BASE_ROOT_ID,
     color: design.baseType === 'casters' ? '#5f6973' : '#737e88',
-    position: [overallWidth / 2, BASE_HEIGHT / 2, STANDARD_DEPTH / 2],
-    size: [Math.max(overallWidth, 10), BASE_HEIGHT, STANDARD_DEPTH * 0.85],
+    position: [overallWidth / 2, BASE_HEIGHT / 2, designDepth / 2],
+    size: [Math.max(overallWidth, 10), BASE_HEIGHT, designDepth * 0.85],
   });
 
   if (design.casterEnabled && overallWidth > 0) {
     const casterXPositions = [CASTER_RADIUS, overallWidth - CASTER_RADIUS];
-    const casterZPositions = [CASTER_RADIUS, STANDARD_DEPTH - CASTER_RADIUS];
+    const casterZPositions = [CASTER_RADIUS, designDepth - CASTER_RADIUS];
 
     casterXPositions.forEach((xPos, xIndex) => {
       casterZPositions.forEach((zPos, zIndex) => {
@@ -617,6 +624,6 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
     bays: layoutBays,
     boxes,
     cylinders,
-    sceneOffset: [-overallWidth / 2, -overallHeight / 2, -STANDARD_DEPTH / 2],
+    sceneOffset: [-overallWidth / 2, -overallHeight / 2, -designDepth / 2],
   };
 }

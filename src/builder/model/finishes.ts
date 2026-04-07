@@ -8,7 +8,7 @@ export const panelFinishColors: Record<PanelFinish, string> = {
   'dark-green': '#365845',
   'light-grey-metal': '#bcc3c8',
   'dark-metal': '#4a5056',
-  'clear-glass': '#dff4ff',
+  'clear-glass': '#bfe8ff',
 };
 
 export type PanelMaterialSpec = {
@@ -16,6 +16,7 @@ export type PanelMaterialSpec = {
   opacity: number;
   roughness: number;
   metalness: number;
+  transmission?: number;
 };
 
 export const panelFinishMaterials: Record<PanelFinish, PanelMaterialSpec> = {
@@ -24,48 +25,56 @@ export const panelFinishMaterials: Record<PanelFinish, PanelMaterialSpec> = {
     opacity: 1,
     roughness: 0.58,
     metalness: 0.06,
+    transmission: 0,
   },
   walnut: {
     color: '#6f4d37',
     opacity: 1,
     roughness: 0.62,
     metalness: 0.04,
+    transmission: 0,
   },
   'blue-stain': {
     color: '#406b8c',
     opacity: 1,
     roughness: 0.5,
     metalness: 0.08,
+    transmission: 0,
   },
   'red-stain': {
     color: '#8a433f',
     opacity: 1,
     roughness: 0.52,
     metalness: 0.08,
+    transmission: 0,
   },
   'dark-green': {
     color: '#365845',
     opacity: 1,
     roughness: 0.56,
     metalness: 0.06,
+    transmission: 0,
   },
   'light-grey-metal': {
     color: '#bcc3c8',
     opacity: 1,
     roughness: 0.32,
     metalness: 0.62,
+    transmission: 0,
   },
   'dark-metal': {
     color: '#4a5056',
     opacity: 1,
     roughness: 0.28,
     metalness: 0.68,
+    transmission: 0,
   },
   'clear-glass': {
-    color: '#dff4ff',
-    opacity: 0.34,
-    roughness: 0.08,
+    color: '#bfe8ff',
+    opacity: 0.52,
+    roughness: 0.22,
     metalness: 0.02,
+    transmission: 0.42,
   },
 };
 

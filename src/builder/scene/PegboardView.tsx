@@ -91,6 +91,7 @@ export function PegboardView({
   const resolvedOpacity = descriptor.opacity ?? 1;
   const resolvedRoughness = descriptor.roughness ?? 0.58;
   const resolvedMetalness = descriptor.metalness ?? 0.08;
+  const resolvedTransmission = descriptor.transmission ?? 0.68;
   const isTransparent = resolvedOpacity < 1;
   const holeLayout = useMemo(
     () => deriveHoleLayout(descriptor.size),
@@ -123,7 +124,7 @@ export function PegboardView({
             emissiveIntensity={selected ? 0.3 : hovered ? 0.12 : 0}
             transparent
             opacity={resolvedOpacity}
-            transmission={0.68}
+            transmission={resolvedTransmission}
             thickness={1}
             clearcoat={0.4}
             clearcoatRoughness={0.08}
