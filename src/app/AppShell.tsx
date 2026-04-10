@@ -8,7 +8,7 @@ export function AppShell() {
       <header className="app-header">
         <div>
           <p className="eyebrow">Wardrobe / Shelving Configurator</p>
-          <h1>Modular Builder MVP</h1>
+          <h1>Allu Extrusion Cabinet Builder</h1>
         </div>
         <p className="app-header__copy">
           Assemble valid frame-and-panel structures from presets, inspect the
