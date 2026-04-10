@@ -16,6 +16,7 @@ export const PANEL_FINISHES = [
   'light-grey-metal',
   'dark-metal',
   'clear-glass',
+  'frosted-acrylic',
 ] as const;
 
 export const FRAME_FINISHES = ['raw-aluminium', 'black'] as const;
@@ -223,6 +224,8 @@ export type BoxDescriptor = {
   roughness?: number;
   metalness?: number;
   transmission?: number;
+  cornerRadius?: number;
+  cornerSegments?: number;
   position: [number, number, number];
   size: [number, number, number];
 };

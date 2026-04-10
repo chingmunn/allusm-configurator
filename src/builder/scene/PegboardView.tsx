@@ -1,4 +1,4 @@
-import { Edges } from '@react-three/drei';
+import { Edges, RoundedBox } from '@react-three/drei';
 import { useEffect, useMemo, useState } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
 import type { BoxDescriptor } from '../model/types';
@@ -98,6 +98,8 @@ export function PegboardView({
   const resolvedMetalness = descriptor.metalness ?? 0.08;
   const resolvedTransmission = descriptor.transmission ?? 0.68;
   const isTransparent = resolvedOpacity < 1;
+  const hasRoundedCorners =
+    Boolean(descriptor.cornerRadius) && (descriptor.cornerRadius ?? 0) > 0;
   const holeLayout = useMemo(
     () => deriveHoleLayout(descriptor.size),
     [descriptor.size],
@@ -114,6 +116,41 @@ export function PegboardView({
     onSelect(descriptor.selectId);
   };
 
+  const surfaceMaterial = isTransparent ? (
+    <meshPhysicalMaterial
+      color={descriptor.color}
+      roughness={resolvedRoughness}
+      metalness={resolvedMetalness}
+      emissive={selected && !renderMode ? '#ffffff' : descriptor.color}
+      emissiveIntensity={renderMode ? 0 : selected ? 0.3 : hovered ? 0.12 : 0}
+      transparent
+      opacity={resolvedOpacity}
+      transmission={renderMode ? Math.min(resolvedTransmission + 0.08, 0.9) : resolvedTransmission}
+      thickness={1}
+      clearcoat={0.4}
+      clearcoatRoughness={0.08}
+      depthWrite={false}
+    />
+  ) : (
+    <meshStandardMaterial
+      color={descriptor.color}
+      roughness={resolvedRoughness}
+      metalness={resolvedMetalness}
+      emissive={selected && !renderMode ? '#ffffff' : descriptor.color}
+      emissiveIntensity={renderMode ? 0 : selected ? 0.34 : hovered ? 0.14 : 0}
+    />
+  );
+
+  const edgeNode =
+    selected && !renderMode ? (
+      <Edges color="#ffffff" scale={1.01} threshold={15} />
+    ) : null;
+
+  const commonSurfaceProps = {
+    castShadow: true,
+    receiveShadow: true,
+  } as const;
+
   return (
     <group
       position={descriptor.position}
@@ -127,36 +164,23 @@ export function PegboardView({
       }}
       onPointerOut={() => setHovered(false)}
     >
-      <mesh castShadow receiveShadow>
-        <boxGeometry args={descriptor.size} />
-        {isTransparent ? (
-          <meshPhysicalMaterial
-            color={descriptor.color}
-            roughness={resolvedRoughness}
-            metalness={resolvedMetalness}
-            emissive={selected && !renderMode ? '#ffffff' : descriptor.color}
-            emissiveIntensity={renderMode ? 0 : selected ? 0.3 : hovered ? 0.12 : 0}
-            transparent
-            opacity={resolvedOpacity}
-            transmission={renderMode ? Math.min(resolvedTransmission + 0.08, 0.9) : resolvedTransmission}
-            thickness={1}
-            clearcoat={0.4}
-            clearcoatRoughness={0.08}
-            depthWrite={false}
-          />
-        ) : (
-          <meshStandardMaterial
-            color={descriptor.color}
-            roughness={resolvedRoughness}
-            metalness={resolvedMetalness}
-            emissive={selected && !renderMode ? '#ffffff' : descriptor.color}
-            emissiveIntensity={renderMode ? 0 : selected ? 0.34 : hovered ? 0.14 : 0}
-          />
-        )}
-        {selected && !renderMode ? (
-          <Edges color="#ffffff" scale={1.01} threshold={15} />
-        ) : null}
-      </mesh>
+      {hasRoundedCorners ? (
+        <RoundedBox
+          {...commonSurfaceProps}
+          args={descriptor.size}
+          radius={descriptor.cornerRadius}
+          smoothness={descriptor.cornerSegments ?? 3}
+        >
+          {surfaceMaterial}
+          {edgeNode}
+        </RoundedBox>
+      ) : (
+        <mesh {...commonSurfaceProps}>
+          <boxGeometry args={descriptor.size} />
+          {surfaceMaterial}
+          {edgeNode}
+        </mesh>
+      )}
 
       {holeLayout.positions.map((position, index) => (
         <mesh

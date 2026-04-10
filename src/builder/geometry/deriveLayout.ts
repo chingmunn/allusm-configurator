@@ -81,6 +81,8 @@ function pushFrameBox(
     color: frameFinishColors[design.frameFinish],
     position,
     size,
+    cornerRadius: getCornerRadius('frame', size),
+    cornerSegments: 3,
   });
 }
 
@@ -94,6 +96,33 @@ function getPanelMaterialProps(finish: keyof typeof panelFinishMaterials) {
     metalness: material.metalness,
     transmission: material.transmission,
   };
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(value, max));
+}
+
+function getCornerRadius(
+  kind: BoxDescriptor['kind'],
+  size: [number, number, number],
+): number {
+  const minDimension = Math.min(...size);
+
+  switch (kind) {
+    case 'frame':
+      return clamp(minDimension * 0.18, 2, 5);
+    case 'panel':
+    case 'pegboard':
+    case 'shelf':
+      return clamp(minDimension * 0.14, 1.5, 3);
+    case 'bench':
+    case 'drawer':
+      return clamp(minDimension * 0.16, 2, 6);
+    case 'base':
+      return clamp(minDimension * 0.14, 2, 6);
+    default:
+      return 0;
+  }
 }
 
 export function deriveLayout(design: DesignConfig): LayoutResult {
@@ -429,6 +458,7 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
         color: '#eef3f6',
         position: [centerX, centerY, designDepth / 2],
         size: [innerWidth, innerHeight, innerDepth],
+        cornerRadius: 0,
       });
 
       if (compartment.panels.backPanel) {
@@ -444,6 +474,11 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
             designDepth - PANEL_THICKNESS / 2 - FRAME_BAR_THICKNESS,
           ],
           size: [innerWidth, innerHeight, PANEL_THICKNESS],
+          cornerRadius: getCornerRadius(
+            compartment.panels.backPanel.pegboard ? 'pegboard' : 'panel',
+            [innerWidth, innerHeight, PANEL_THICKNESS],
+          ),
+          cornerSegments: 3,
         });
       }
 
@@ -456,6 +491,11 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
           ...material,
           position: [centerX, bottomY + height - PANEL_THICKNESS / 2, designDepth / 2],
           size: [innerWidth, PANEL_THICKNESS, innerDepth],
+          cornerRadius: getCornerRadius(
+            compartment.panels.topPanel.pegboard ? 'pegboard' : 'panel',
+            [innerWidth, PANEL_THICKNESS, innerDepth],
+          ),
+          cornerSegments: 3,
         });
       }
 
@@ -470,6 +510,11 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
           ...material,
           position: [centerX, bottomY + PANEL_THICKNESS / 2, designDepth / 2],
           size: [innerWidth, PANEL_THICKNESS, innerDepth],
+          cornerRadius: getCornerRadius(
+            compartment.panels.bottomPanel.pegboard ? 'pegboard' : 'panel',
+            [innerWidth, PANEL_THICKNESS, innerDepth],
+          ),
+          cornerSegments: 3,
         });
       }
 
@@ -492,6 +537,11 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
             designDepth / 2,
           ],
           size: [PANEL_THICKNESS, innerHeight, innerDepth],
+          cornerRadius: getCornerRadius(
+            panel.pegboard ? 'pegboard' : 'panel',
+            [PANEL_THICKNESS, innerHeight, innerDepth],
+          ),
+          cornerSegments: 3,
         });
       });
 
@@ -508,6 +558,12 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
             ...material,
             position: [centerX, centerY, designDepth / 2],
             size: [innerWidth, SHELF_THICKNESS, innerDepth * 0.9],
+            cornerRadius: getCornerRadius('shelf', [
+              innerWidth,
+              SHELF_THICKNESS,
+              innerDepth * 0.9,
+            ]),
+            cornerSegments: 3,
           });
           }
           break;
@@ -554,6 +610,12 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
               designDepth / 2,
             ],
             size: [innerWidth, SHELF_THICKNESS, innerDepth * 0.95],
+            cornerRadius: getCornerRadius('bench', [
+              innerWidth,
+              SHELF_THICKNESS,
+              innerDepth * 0.95,
+            ]),
+            cornerSegments: 3,
           });
           boxes.push({
             id: `bench-front-${compartment.id}`,
@@ -566,6 +628,12 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
               FRAME_BAR_THICKNESS + PANEL_THICKNESS / 2,
             ],
             size: [innerWidth, innerHeight * 0.7, PANEL_THICKNESS],
+            cornerRadius: getCornerRadius('bench', [
+              innerWidth,
+              innerHeight * 0.7,
+              PANEL_THICKNESS,
+            ]),
+            cornerSegments: 3,
           });
           }
           break;
@@ -583,6 +651,12 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
               FRAME_BAR_THICKNESS + DRAWER_FACE_THICKNESS / 2,
             ],
             size: [innerWidth * 0.96, innerHeight * 0.82, DRAWER_FACE_THICKNESS],
+            cornerRadius: getCornerRadius('drawer', [
+              innerWidth * 0.96,
+              innerHeight * 0.82,
+              DRAWER_FACE_THICKNESS,
+            ]),
+            cornerSegments: 3,
           });
           }
           break;
@@ -597,6 +671,12 @@ export function deriveLayout(design: DesignConfig): LayoutResult {
     color: design.baseType === 'casters' ? '#5f6973' : '#737e88',
     position: [overallWidth / 2, BASE_HEIGHT / 2, designDepth / 2],
     size: [Math.max(overallWidth, 10), BASE_HEIGHT, designDepth * 0.85],
+    cornerRadius: getCornerRadius('base', [
+      Math.max(overallWidth, 10),
+      BASE_HEIGHT,
+      designDepth * 0.85,
+    ]),
+    cornerSegments: 3,
   });
 
   if (design.casterEnabled && overallWidth > 0) {

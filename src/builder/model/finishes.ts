@@ -9,6 +9,7 @@ export const panelFinishColors: Record<PanelFinish, string> = {
   'light-grey-metal': '#bcc3c8',
   'dark-metal': '#4a5056',
   'clear-glass': '#bfe8ff',
+  'frosted-acrylic': '#edf7ff',
 };
 
 export type PanelMaterialSpec = {
@@ -75,6 +76,13 @@ export const panelFinishMaterials: Record<PanelFinish, PanelMaterialSpec> = {
     roughness: 0.22,
     metalness: 0.02,
     transmission: 0.42,
+  },
+  'frosted-acrylic': {
+    color: '#edf7ff',
+    opacity: 0.8,
+    roughness: 0,
+    metalness: 0.01,
+    transmission: 0.5,
   },
 };
 

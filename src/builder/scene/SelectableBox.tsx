@@ -1,4 +1,4 @@
-import { Edges } from '@react-three/drei';
+import { Edges, RoundedBox } from '@react-three/drei';
 import { useEffect, useState } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
 import type { BoxDescriptor } from '../model/types';
@@ -40,6 +40,8 @@ export function SelectableBox({
     (descriptor.kind === 'panel' ||
       descriptor.kind === 'pegboard' ||
       descriptor.kind === 'shelf');
+  const hasRoundedCorners =
+    Boolean(descriptor.cornerRadius) && (descriptor.cornerRadius ?? 0) > 0;
 
   useEffect(() => {
     if (renderMode) {
@@ -52,55 +54,74 @@ export function SelectableBox({
     onSelect(descriptor.selectId);
   };
 
+  const commonProps = {
+    position: descriptor.position,
+    onPointerDown: handlePointerDown,
+    onPointerOver: (event: ThreeEvent<PointerEvent>) => {
+      if (renderMode) {
+        return;
+      }
+      event.stopPropagation();
+      setHovered(true);
+    },
+    onPointerOut: () => setHovered(false),
+    castShadow: true,
+    receiveShadow: true,
+  } as const;
+
+  const materialNode = useGlassMaterial ? (
+    <meshPhysicalMaterial
+      color={descriptor.color}
+      roughness={resolvedRoughness}
+      metalness={renderMetalness}
+      emissive={selected && !renderMode ? '#ffffff' : descriptor.color}
+      emissiveIntensity={
+        renderMode ? 0 : selected ? 0.32 : hovered ? 0.16 : 0
+      }
+      transparent
+      opacity={resolvedOpacity}
+      transmission={renderTransmission}
+      thickness={1}
+      clearcoat={0.45}
+      clearcoatRoughness={0.08}
+      depthWrite={false}
+    />
+  ) : (
+    <meshStandardMaterial
+      color={descriptor.color}
+      roughness={resolvedRoughness}
+      metalness={renderMetalness}
+      emissive={selected && !renderMode ? '#ffffff' : descriptor.color}
+      emissiveIntensity={
+        renderMode ? 0 : selected ? 0.36 : hovered ? 0.18 : 0
+      }
+      transparent={resolvedOpacity < 1}
+      opacity={resolvedOpacity}
+    />
+  );
+
+  const edgeNode =
+    selected && !renderMode ? (
+      <Edges color="#ffffff" scale={1.01} threshold={15} />
+    ) : null;
+
   return (
-    <mesh
-      position={descriptor.position}
-      onPointerDown={handlePointerDown}
-      onPointerOver={(event) => {
-        if (renderMode) {
-          return;
-        }
-        event.stopPropagation();
-        setHovered(true);
-      }}
-      onPointerOut={() => setHovered(false)}
-      castShadow
-      receiveShadow
-    >
-      <boxGeometry args={descriptor.size} />
-      {useGlassMaterial ? (
-        <meshPhysicalMaterial
-          color={descriptor.color}
-          roughness={resolvedRoughness}
-          metalness={renderMetalness}
-          emissive={selected && !renderMode ? '#ffffff' : descriptor.color}
-          emissiveIntensity={
-            renderMode ? 0 : selected ? 0.32 : hovered ? 0.16 : 0
-          }
-          transparent
-          opacity={resolvedOpacity}
-          transmission={renderTransmission}
-          thickness={1}
-          clearcoat={0.45}
-          clearcoatRoughness={0.08}
-          depthWrite={false}
-        />
-      ) : (
-        <meshStandardMaterial
-          color={descriptor.color}
-          roughness={resolvedRoughness}
-          metalness={renderMetalness}
-          emissive={selected && !renderMode ? '#ffffff' : descriptor.color}
-          emissiveIntensity={
-            renderMode ? 0 : selected ? 0.36 : hovered ? 0.18 : 0
-          }
-          transparent={resolvedOpacity < 1}
-          opacity={resolvedOpacity}
-        />
-      )}
-      {selected && !renderMode ? (
-        <Edges color="#ffffff" scale={1.01} threshold={15} />
-      ) : null}
-    </mesh>
+    hasRoundedCorners ? (
+      <RoundedBox
+        {...commonProps}
+        args={descriptor.size}
+        radius={descriptor.cornerRadius}
+        smoothness={descriptor.cornerSegments ?? 3}
+      >
+        {materialNode}
+        {edgeNode}
+      </RoundedBox>
+    ) : (
+      <mesh {...commonProps}>
+        <boxGeometry args={descriptor.size} />
+        {materialNode}
+        {edgeNode}
+      </mesh>
+    )
   );
 }
